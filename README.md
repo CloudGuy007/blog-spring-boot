@@ -18,5 +18,5 @@ In this module, we'll add blog data to the PostRepository class and then display
 In this module, we'll incorporate css and template substitution into our home template.
 
 
-#Display a Post Details Page
+# Display a Post Details Page
 In this module, we'll display a post details page by adding a request mapping to the controller.

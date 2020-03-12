@@ -1,178 +1,173 @@
 package com.pluralsight.blog;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import com.pluralsight.blog.model.Post;
 import com.pluralsight.blog.data.PostRepository;
-import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.persistence.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc(print = MockMvcPrint.NONE)
-@PrepareForTest(BlogController.class)
+//@AutoConfigureMockMvc
+//@PrepareForTest(BlogController.class)
 public class Module1_Tests {
 
-	@Autowired
-	private MockMvc mvc;
+//    @Autowired
+//    private MockMvc mvc;
 
-//	@Autowired(required = false)
-//	private PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
-	@MockBean
-	private PostRepository postRepository;
+//    @Autowired
+//    private BlogController blogController;
+//
+//    private Class c = null;
+//    private Method method = null;
+//    private boolean methodParametersExist = false;
 
-	@Autowired
-	private BlogController blogController;
-
-	private Class c = null;
-	private Method method = null;
-	private boolean methodParametersExist = false;
-	@Before
-	public void setup() {
-		// Task 1
-		String packageName = getClass().getPackage().getName();
-		String className = "BlogController";
-
-		try {
-			c = Class.forName(packageName + "." + className);
-		} catch (ClassNotFoundException e) {
-			////e.printStackTrace();
-		}
-
-		// Task 2(a) - setup - Check if method listPosts() exists
-		try {
-			method = c.getMethod("listPosts");
-		} catch (Exception e) {
-			////e.printStackTrace();
-		}
-
-		// Task 4 setup
-		try {
-			method = c.getMethod("listPosts", ModelMap.class);
-			methodParametersExist = true;
-		} catch (Exception e) {
-			////e.printStackTrace();
-		}
-	}
+    @Before
+    public void setup() {
+//        try {
+//            MvcResult result  = this.mvc.perform(get("/")).andReturn();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+    }
 
 
-	@Test
-	public void task_1() {
-		// Task 2(a) - Check if method listPosts() exists
-		assertNotNull("Task 1: Method `listPosts()` does not exist in BlogController.", method);
-	}
+    @Test
+    public void task_1() {
+        // Verify @Entity annotation
+        // TODO All tests will fail with errors if SpringBootTest is used and The Entity doesn't have an @Id
+        Annotation[] annotations =  Post.class.getDeclaredAnnotations();
 
-	@Test
-	public void task_2() {
-		// Task 1
-		assertNotNull("Task 1: Method `listPosts()` does not exist in BlogController.", method);
+        assertTrue("There should be 1 annotation, @Entity, on the Post class.", annotations.length == 1);
 
-		// Task 2 - Check for @ResponseBody and @RequestMapping Annotations
-		Annotation[] annotations = method.getDeclaredAnnotations();
+        assertEquals("The annotation on the Post class is not of type @Entity.", Entity.class,annotations[0].annotationType());
 
-		boolean requestMappingExists = false;
-		//boolean responseBodyExists = false;
+        Annotation[] fieldAnnotations = null;
 
-		for (Annotation methodAnnotation : annotations) {
-			if (methodAnnotation instanceof RequestMapping) {
-				requestMappingExists = true;
-			}
-		}
-		assertTrue("Task 2: `@RequestMapping(\"/\")` annotation does not exist in listPosts().",
-				requestMappingExists);
+        try {
+            Field field = Post.class.getDeclaredField("id");
+            fieldAnnotations = field.getDeclaredAnnotations();
+        } catch (NoSuchFieldException e) {
+            //e.printStackTrace();
+        }
 
-		// TODO Task 2 - Additional test - Check that String "Hello World" is displayed
-	}
+        String message = "The field id should have two annotations @Id and @GeneratedValue(strategy = GenerationType.IDENTITY).";
+        assertTrue(message, fieldAnnotations.length == 2);
+
+        boolean hasIdAnnotation = false;
+        boolean hasGeneratedAnnotation = false;
+
+        for (Annotation annotation : fieldAnnotations) {
+            if (annotation.annotationType() == Id.class) hasIdAnnotation = true;
+            if (annotation.annotationType() == GeneratedValue.class) hasGeneratedAnnotation = true;
+            //System.out.println("annotation = " + annotation);
+        }
+
+        assertTrue("The field id does not have the annotation @Id.", hasIdAnnotation);
+        assertTrue("The field id does not have the annotation @GeneratedValue(strategy = GenerationType.IDENTITY).", hasGeneratedAnnotation);
+    }
+
+    @Test
+    public void task_2() {
+        Annotation[] fieldAnnotations = null;
+
+        try {
+            Field field = Post.class.getDeclaredField("body");
+            fieldAnnotations = field.getDeclaredAnnotations();
+        } catch (NoSuchFieldException e) {
+            //e.printStackTrace();
+        }
+
+        String message = "The field body should have 2 annotations @Column(length=1000000) and @Lob.";
+        assertTrue(message, fieldAnnotations.length == 2);
+
+        boolean hasColumnAnnotation = false;
+        boolean hasLobAnnotation = false;
+
+        for (Annotation annotation : fieldAnnotations) {
+            if (annotation.annotationType() == Column.class) {hasColumnAnnotation = true;}
+            if (annotation.annotationType() == Lob.class) hasLobAnnotation = true;
+            //System.out.println("annotation = " + annotation);
+        }
+
+        assertTrue("The field body does not have the annotation @Column(length=1000000).", hasColumnAnnotation);
+        assertTrue("The field body does not have the annotation @Lob.", hasLobAnnotation);
+    }
+
+    @Test
+    public void task_3() {
+        Annotation[] fieldAnnotations = null;
+
+        try {
+            Field field = Post.class.getDeclaredField("date");
+            fieldAnnotations = field.getDeclaredAnnotations();
+        } catch (NoSuchFieldException e) {
+            //e.printStackTrace();
+        }
+
+        String message = "The field date should have 1 annotation @Temporal(TemporalType.DATE).";
+        assertTrue(message, fieldAnnotations.length == 1);
+
+        System.out.println("annotation = " + fieldAnnotations[0]);
+
+        message = "The field date does not have the annotation @Temporal(TemporalType.DATE).";
+        assertTrue(message, fieldAnnotations[0].annotationType() == Temporal.class);
+    }
+
+    @Test
+    public void task_4() {
+        Class c = PostRepository.class;
+        Class[] interfaces = c.getInterfaces();
+
+        assertEquals("PostRepository should extend 1 interface - JpaRepository.",
+                1, interfaces.length);
+
+        assertEquals("PostRepository should be an interface that extends JpaRepository<Post, Long>.",
+                JpaRepository.class, interfaces[0]);
+    }
+
+    @Test
+    public void task_5() {
+        List<Post> posts = postRepository.findAll();
+        assertNotNull("PostRepository's findAll() method returns null.", posts);
+
+        List<String> titles = new ArrayList<>(Arrays.asList("Earbuds",
+                "Smart Speakers",
+                "Device Charger",
+                "Smart Home Lock",
+                "Smart Instant Pot",
+                "Mobile Tripod",
+                "Travel Keyboard",
+                "SD Card Reader"));
+
+        assertEquals("There should be " + titles.size() + " Posts loaded from data-categories.sql.", titles.size(), posts.size());
 
 
-	@Test
-	public void task_3() {
-		// Task 3(a)
-		assertNotNull("Task 1: Method `listPosts()` does not exist in BlogController.", method);
-		int numParameters = method.getParameterCount();
-		assertTrue("Task 3: `listPosts()` needs a `ModelMap` parameter.", numParameters >= 1);
+        boolean titlesMatch = true;
+        for (int i = 0; i<posts.size(); i++) {
+            if (!posts.get(i).getTitle().equals(titles.get(i))) {
+                titlesMatch = false;
+                break;
+            }
+        }
 
-		Class[] classes = method.getParameterTypes();
-		boolean modelMapExists = false;
-		for (Class paramClass : classes) {
-			if (paramClass.equals(ModelMap.class))
-				modelMapExists = true;
-		}
-
-		assertTrue("Task 3: `listPosts()` needs a `ModelMap` parameter.", modelMapExists);
-
-		// Task 3(b) - Verify modelMap.put() is called
-		ModelMap modelMap = Mockito.mock(ModelMap.class);
-		Mockito.when(modelMap.put("title", "Blog Post 1")).thenReturn(null);
-		assertNotNull("Task 1: Method listPosts() does not exist in BlogController.", method);
-		//blogController.listPosts(modelMap);
-		try {
-			method.invoke(blogController, modelMap);
-		} catch (IllegalArgumentException e) {
-			//e.printStackTrace();
-		} catch (Exception e) {
-			//e.printStackTrace();
-		}
-
-		boolean putCalledCorrectly = false;
-		try {
-			Mockito.verify(modelMap).put("title", "Blog Post 1");
-			putCalledCorrectly = true;
-		} catch (Error e) {
-			////e.printStackTrace();
-		}
-
-		assertTrue("Task 3: Did not call `put()` on the `ModelMap` with a key of `\"title\"` and `\"Blog Post 1\"`",
-				putCalledCorrectly);
-	}
-
-	@Test
-	public void task_4() {
-		// TODO This fails after Module 3 is completed
-		Document doc = null;
-		String errorInfo = "";
-		try {
-			MvcResult result = this.mvc.perform(get("/")).andReturn();
-			MockHttpServletResponse response = result.getResponse();
-			String content = response.getContentAsString();
-
-			doc = Jsoup.parse(content);
-		} catch (Exception e) {
-			errorInfo = e.getLocalizedMessage();
-			//e.printStackTrace();
-		}
-
-		String message = "Task 4: The template has errors - " + errorInfo + ".";
-		assertNotNull(message, doc);
-
-		Elements h2Elements = doc.getElementsByTag("h2");
-
-		assertTrue("Task 4: An `<h2>` tag does not exist in the `home.html` template.",
-				h2Elements.size() > 0);
-
-		assertEquals("Task 4: An `<h2>` tag does not display the title parameter.",
-				"Blog Post 1", h2Elements.first().html());
-	}
+        assertTrue("The titles loaded from data-categories.sql do not match the expected titles.", titlesMatch);
+    }
 
 }

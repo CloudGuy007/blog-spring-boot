@@ -1,5 +1,5 @@
 # Blog-with-Spring-Boot
-Build a Basic Blog with Spring Boot and Pluralsight
+Build a Basic Blog with Spring Boot
 ![Screenshot](image.png)
 
 # Setup

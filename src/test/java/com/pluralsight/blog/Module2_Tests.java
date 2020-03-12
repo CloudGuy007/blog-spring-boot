@@ -1,32 +1,38 @@
 package com.pluralsight.blog;
 
+import com.pluralsight.blog.data.CategoryRepository;
+import com.pluralsight.blog.data.PostRepository;
+import com.pluralsight.blog.model.Category;
 import com.pluralsight.blog.model.Post;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import com.pluralsight.blog.data.PostRepository;
 import org.jsoup.select.Elements;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.ui.ModelMap;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -34,282 +40,218 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc(print = MockMvcPrint.NONE)
-@PrepareForTest(BlogController.class)
+@AutoConfigureMockMvc
 public class Module2_Tests {
 
     @Autowired
     private MockMvc mvc;
 
-    @Autowired
-    private BlogController blogController;
-
-
-    @Autowired
-    private PostRepository postRepository;
-
-    private PostRepository spyRepository;
-
-    private Class c = null;
-    private Method method = null;
-
-    private List<Post> ALL_POSTS;
-
-    @Before
-    public void setup() {
-
-
-        // Task 1
-        String packageName = getClass().getPackage().getName();
-        String className = "BlogController";
-
-        try {
-            c = Class.forName(packageName + "." + className);
-        } catch (ClassNotFoundException e) {
-            ////e.printStackTrace();
-        }
-
-        Constructor<BlogController> constructor = null;
-        try {
-            constructor = BlogController.class.getDeclaredConstructor(PostRepository.class);
-        } catch (NoSuchMethodException e) {
-            //e.printStackTrace();
-        }
-
-        spyRepository = Mockito.spy(postRepository);
-        try {
-            blogController = constructor.newInstance(spyRepository); //new BlogController(spyRepository);
-        } catch (Exception e) {
-            //e.printStackTrace();
-        }
-
-        // Task 2(a) - setup - Check if method listPosts() exists
-        try {
-            method = c.getMethod("listPosts");
-        } catch (Exception e) {
-            ////e.printStackTrace();
-        }
-
-        // Task 4 setup
-        try {
-            method = c.getMethod("listPosts", ModelMap.class);
-        } catch (Exception e) {
-            ////e.printStackTrace();
-        }
-
-        // TODO Make this work if Post constructor doesn't exist
-        ALL_POSTS = new ArrayList<>(Arrays.asList(
-                new Post(1l, "Earbuds",
-                        "You have got to try these in your ears. So tiny and can even block the sounds of screaming toddlers if you so desire.",
-                        "You have got to try these in your ears. So tiny and can even block the sounds of screaming toddlers if you so desire.",
-                        "Sarah Holderness", new Date()),
-                new Post(2l, "Smart Speakers",
-                        "Smart speakers listen to you all right.  Sometimes they get a little snippy but will still order your favorite takeout.",
-                        "Smart speakers listen to you all right.  Sometimes they get a little snippy but will still order your favorite takeout.",
-                        "Sarah Holderness", new Date()),
-                new Post(3l, "Device Charger",
-                        "We all do a little too much scrolling in lieu of human interaction. This charger will keep you isolated.",
-                        "We all do a little too much scrolling in lieu of human interaction. This charger will keep you isolated.",
-                        "Sarah Holderness", new Date()),
-                new Post(4l, "Smart Home Lock",
-                        "Want to play tricks on your teenager? This smart home lock will lock them out when they act like they run the house.",
-                        "Want to play tricks on your teenager? This smart home lock will lock them out when they act like they run the house.",
-                        "Sarah Holderness", new Date()),
-                new Post(5l, "Smart Instant Pot",
-                        "This Instant Pot can do your shopping for you. When it gets home it will also put your meal together.",
-                        "This Instant Pot can do your shopping for you. When it gets home it will also put your meal together.",
-                        "Sarah Holderness", new Date()),
-                new Post(6l, "Mobile Tripod",
-                        "Best gift for that older adult in your life who cannot keep their face in the FaceTime window.",
-                        "Best gift for that older adult in your life who cannot keep their face in the FaceTime window.",
-                        "Sarah Holderness", new Date()),
-                new Post(7l, "Travel Keyboard",
-                        "You never know when inspiration for your latest novel will strike. Meet the perfect travel keyboard for your random thoughts.",
-                        "You never know when inspiration for your latest novel will strike. Meet the perfect travel keyboard for your random thoughts.",
-                        "Sarah Holderness", new Date()),
-                new Post(8l, "SD Card Reader",
-                        "When a stranger passes us a top secret SD card the adventure begins.  Jason Bourne says, \"Hi\".",
-                        "When a stranger passes us a top secret SD card the adventure begins.  Jason Bourne says, \"Hi\".",
-                        "Sarah Holderness", new Date())
-        ));
-    }
-
     @Test
     public void task_1() {
-        Field[] fields = PostRepository.class.getDeclaredFields();
+        // Task 3 - Check for @Entity
+        Annotation[] annotations = Category.class.getDeclaredAnnotationsByType(Entity.class);
 
-        boolean allPostsExists = false;
-        for (Field field : fields) {
-            if (field.getName().equals("ALL_POSTS") && field.getType().equals(List.class))
-                allPostsExists = true;
+        boolean entityExists = false;
 
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation instanceof Entity) {
+                entityExists = true;
+            }
         }
-        assertTrue("Task 1: A field called `ALL_POSTS` of type List does not exist in PostRepository", allPostsExists);
+        assertTrue("Task 1: @Entity annotation does not exist before the Category class declaration.",
+                entityExists);
+
+        Annotation[] fieldAnnotations = null;
+
+        try {
+            Field field = Category.class.getDeclaredField("id");
+            fieldAnnotations = field.getDeclaredAnnotations();
+        } catch (NoSuchFieldException e) {
+            //e.printStackTrace();
+        }
+
+        String message = "Task 1: The field id should have two annotations @Id and @GeneratedValue(strategy = GenerationType.IDENTITY).";
+        assertTrue(message, fieldAnnotations.length == 2);
+
+        boolean hasIdAnnotation = false;
+        boolean hasGeneratedAnnotation = false;
+
+        for (Annotation annotation : fieldAnnotations) {
+            if (annotation.annotationType() == Id.class) hasIdAnnotation = true;
+            if (annotation.annotationType() == GeneratedValue.class) hasGeneratedAnnotation = true;
+            //System.out.println("annotation = " + annotation);
+        }
+
+        assertTrue("Task 1: The field id does not have the annotation @Id.", hasIdAnnotation);
+        assertTrue("Task 1: The field id does not have the annotation @GeneratedValue(strategy = GenerationType.IDENTITY).", hasGeneratedAnnotation);
     }
 
     @Test
     public void task_2() {
-        Method method = null;
-        List<Post> postList = null;
+        // Verify Category property called category exists in the Post class
+        Field field = null;
         try {
-            method = PostRepository.class.getMethod("getAllPosts");
-            postList = (List<Post>)method.invoke(spyRepository);
-        } catch (Exception e) {
+            field =  Post.class.getDeclaredField("category");
+        } catch (NoSuchFieldException e) {
             //e.printStackTrace();
         }
-        String message = "Task 2: The method `getAllPosts()` does not exist in the PostRepository class.";
-        assertNotNull(message, method);
 
-        message = "Task 2: The method `getAllPosts()` returns `null`.";
-        assertNotNull(message, postList);
+        String message = "Task 2: The Post class does not have a Category field named category.";
+        assertNotNull(message, field);
+        assertTrue(message, field.getType() == Category.class);
 
-        message = "Task 2: The method `getAllPosts()` does not return the correct `List`.";
-        assertEquals(message, spyRepository.getAllPosts(), postList);
+        // Verify that the Category field has the @ManyToOne annotation
+        Annotation[] annotations = field.getDeclaredAnnotations();
+
+        message = "Task 2: The field category should have 1 annotation - the @ManyToOne annotation.";
+        assertEquals(message, 1, annotations.length);
+        assertEquals(message, ManyToOne.class, annotations[0].annotationType());
+
+        // Check for getter
+        Method getCategoryMethod = null;
+        try {
+            getCategoryMethod = Post.class.getMethod("getCategory");
+        } catch (NoSuchMethodException e) { }
+        assertNotNull("Task 3: The getCategory() method does not exist in the Post class.", getCategoryMethod);
+
+        // Check for setter
+        Method setCategoryMethod = null;
+        try {
+            setCategoryMethod = Post.class.getMethod("setCategory", Category.class);
+        } catch (NoSuchMethodException e) { }
+        assertNotNull("Task 3: The setCategory() method does not exist in the Post class.", setCategoryMethod);
     }
 
     @Test
     public void task_3() {
-        // Task 1 - Add field PostRepository postRepository; to BlogController
-        Field[] fields = BlogController.class.getDeclaredFields();
-
-        boolean postRepositoryExists = false;
-        boolean annotationExists = false;
-        for (Field field : fields) {
-            if (field.getName().equals("postRepository") && field.getType().equals(PostRepository.class)) {
-                postRepositoryExists = true;
-            }
-        }
-
-        String message = "Task 3: A field called `postRepository` of type `PostRepository` does not exist in BlogController.";
-        assertTrue(message, postRepositoryExists);
-    }
-    @Test
-    public void task_4() {
-        // Check for BlogController constructor with PostRepository parameter
-        Constructor<BlogController> constructor = null;
+        // Add the corresponding property to the Category Entity, which will be a List of Posts called posts with
+        // the @OneToMany annotation.
+        Field field = null;
         try {
-            constructor = BlogController.class.getDeclaredConstructor(PostRepository.class);
-        } catch (NoSuchMethodException e) {
+            field =  Category.class.getDeclaredField("posts");
+        } catch (NoSuchFieldException e) {
             //e.printStackTrace();
         }
 
-        String message = "Task 4: A `BlogController` constructor with a `PostRepository` parameter does not exist.";
-        assertNotNull(message, constructor);
+        String message = "Task 3: The Category class does not have a List of Posts field named posts.";
+        assertNotNull(message, field);
+        assertTrue(message, field.getType() == List.class);
+        // We also need to do a few additional things in the Category class:
+        //  ** Add a default constructor that calls super() and also initializes posts to an empty ArrayList.
+
+        boolean arrayListInit = false;
+        try {
+             Constructor<Category> constructor = Category.class.getConstructor();
+             Category category = constructor.newInstance();
+             if (category.getPosts().size() == 0)
+                 arrayListInit = true;
+
+        } catch (Exception e) {
+            //e.printStackTrace();
+        }
+        assertTrue("Task 3: The List of posts was not initialized in the default constructor.", arrayListInit);
+
+        //  ** Also add a getter for the List of Posts property.
+        Method getPostsMethod = null;
+        try {
+            getPostsMethod = Category.class.getMethod("getPosts");
+        } catch (NoSuchMethodException e) {
+            //e.printStackTrace();
+        }
+        assertNotNull("Task 3: The getPosts() method does not exist in the Category class.", getPostsMethod);
+
+        //  ** Instead of a setter, add a method called public void addPost(Post post) which adds a post to the list.
+        Method addPostMethod = null;
+        try {
+            addPostMethod = Category.class.getMethod("addPost", Post.class);
+        } catch (NoSuchMethodException e) {
+            //e.printStackTrace();
+        }
+        assertNotNull("Task 3: The addPost(Post post) method does not exist in the Category class.", getPostsMethod);
+    }
+
+    @Test
+    public void task_4() {
+        // Add CategoryRepository
+        // public interface CategoryRepository extends JpaRepository<Category, Long> {}
+        Class c = CategoryRepository.class;
+        Class[] interfaces = c.getInterfaces();
+
+        assertEquals("Task 4: CategoryRepository should extend 1 interface - JpaRepository.",
+                1, interfaces.length);
+
+        assertEquals("Task 4: CategoryRepository should be an interface that extends JpaRepository<Category, Long>.",
+                JpaRepository.class, interfaces[0]);
     }
 
     @Test
     public void task_5() {
-        // Task 5 - Query PostRepository getAllPosts() in BlogController, and save to List
-        // Task 6 - Verify modelMap.put() is called
-        ModelMap modelMap = Mockito.mock(ModelMap.class);
-        Mockito.when(spyRepository.getAllPosts()).thenReturn(ALL_POSTS);
-
-        //blogController.listPosts(modelMap);
+        Method method = null;
         try {
-            method.invoke(blogController, modelMap);
+            method = PostRepository.class.getMethod("findByCategory", Category.class);
         } catch (Exception e) {
-            //e.printStackTrace();
+            ////e.printStackTrace();
         }
 
-        boolean calledGetAllPosts = false;
-        try {
-            Mockito.verify(spyRepository).getAllPosts();
-            calledGetAllPosts = true;
-        } catch (Error e) {
-            //e.printStackTrace();
-        }
-
-        String message = "Task 5: Did not call PostRepository's `getAllPosts()` in BlogController.";
-        assertTrue(message, calledGetAllPosts);
-
+        assertNotNull("Task 5: The method findByCategory() doesn't exist in the PostRepository class.", method );
     }
 
     @Test
     public void task_6() {
-        // Task 6 - Verify modelMap.put() is called
-        ModelMap modelMap = Mockito.mock(ModelMap.class);
-        Mockito.when(spyRepository.getAllPosts()).thenReturn(ALL_POSTS);
-        Mockito.when(modelMap.put("posts", ALL_POSTS)).thenReturn(null);
-
-        //blogController.listPosts(modelMap);
+        // Replace data-categories.sql file to add Categories
+        // Open data-categories.sql file and check contents
+        Path path = Paths.get("src/main/resources/data.sql");
+        String result = "";
         try {
-            method.invoke(blogController, modelMap);
-        } catch (Exception e) {
+            final String output = "";
+            List<String> allLines = Files.readAllLines(path);
+            result = String.join("\n", allLines);
+        } catch (IOException e) {
             //e.printStackTrace();
         }
 
-        boolean calledPut = false;
-        try {
-            Mockito.verify(modelMap).put("posts", ALL_POSTS);
-            calledPut = true;
-        } catch (Error e) {
+        String resultResource = "";
+        ClassLoader classLoader = getClass().getClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream("data-categories.sql")) {
+            resultResource = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
             //e.printStackTrace();
         }
 
-        String message = "Task 6: Did not call ModelMap's `put()` method with the key `\"posts\"` and the `List<Post>`.";
-        assertTrue(message, calledPut);
-
+        assertTrue("Task 6: The `data.sql` file is not the same as `data-categories.sql`.", resultResource.equals(result));
     }
 
     @Test
     public void task_7() {
-        // Task 7 - Display list with foreach loop in template
-        // TODO - How to more robustly test?  Right now just confirming 3 divs show up.
+        // Display Category on details page
         Document doc = null;
         String errorInfo = "";
         try {
-            MvcResult result = this.mvc.perform(get("/")).andReturn();
+            MvcResult result = this.mvc.perform(get("/post/1")).andReturn();
             MockHttpServletResponse response = result.getResponse();
             String content = response.getContentAsString();
 
             doc = Jsoup.parse(content);
         } catch (Exception e) {
-            errorInfo = e.getLocalizedMessage();
+            //errorInfo = e.getLocalizedMessage();
             //e.printStackTrace();
         }
         String message = "Task 7: The template has errors - " + errorInfo + ".";
         assertNotNull(message, doc);
 
-        Elements divElements = doc.getElementsByTag("div");
+        Elements h3Elements = doc.getElementsByTag("h3");
+        Element h3Elem = h3Elements.first();
+        assertNotNull("Task 7: The template doesn't have an <h3> tag.", h3Elem);
 
-        message = "Task 7: A `<div>` tag with `th:each` does not exist in the home.html template.";
-        assertTrue(message,
-                divElements.size() > 0);
-    }
-
-    @Test
-    public void task_8() {
-        // Task 7 - Display list with foreach loop in template
-        // TODO - How to more robustly test?  Right now just confirming 3 divs show up.
-        Document doc = null;
-        String errorInfo = "";
-        try {
-            MvcResult result = this.mvc.perform(get("/")).andReturn();
-            MockHttpServletResponse response = result.getResponse();
-            String content = response.getContentAsString();
-
-            doc = Jsoup.parse(content);
-        } catch (Exception e) {
-            errorInfo = e.getLocalizedMessage();
-            //e.printStackTrace();
+        boolean catExists = false;
+        for (Element elem : h3Elements) {
+            if (elem.text().contains("Mobile Accessories"))
+            {
+                catExists = true;
+                break;
+            }
         }
-        String message = "Task 8: The template has errors - " + errorInfo + ".";
-        assertNotNull(message, doc);
 
-        Elements h2Elements = doc.getElementsByTag("h2");
-        message = "Task 8: An `<h2>` tag does not exist in the home.html template.";
-        assertTrue(message,
-                h2Elements.size() > 0);
-
-        message = "Task 8: "+ALL_POSTS.size()+" `<h2>` tags should have been generated by the Thymeleaf each loop with an `<h2>` tag inside.";
-        assertTrue(message,
-                h2Elements.size() == ALL_POSTS.size());
-
-        // Check each h2 content
-        for (int i=0; i < h2Elements.size(); i++) {
-            Element element = h2Elements.get(i);
-            message = "Task 8: The `<h2>` tag displays the title \"" + element.html() + "\" instead of \"" + ALL_POSTS.get(i).getTitle() + "\".";
-            assertEquals(message, ALL_POSTS.get(i).getTitle(), element.html());
-        }
+        assertTrue("Task 7: The category is not displayed on the post-details page.", catExists);
     }
 }

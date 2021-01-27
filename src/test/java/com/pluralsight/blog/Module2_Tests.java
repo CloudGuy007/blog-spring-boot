@@ -4,7 +4,7 @@ import com.pluralsight.blog.data.CategoryRepository;
 import com.pluralsight.blog.data.PostRepository;
 import com.pluralsight.blog.model.Category;
 import com.pluralsight.blog.model.Post;
-import org.apache.commons.io.IOUtils;
+//import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -213,7 +213,7 @@ public class Module2_Tests {
         String resultResource = "";
         ClassLoader classLoader = getClass().getClassLoader();
         try (InputStream inputStream = classLoader.getResourceAsStream("data-categories.sql")) {
-            resultResource = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+ //foo           resultResource = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
             //e.printStackTrace();
         }

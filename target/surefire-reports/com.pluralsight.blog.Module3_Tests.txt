@@ -1,0 +1,120 @@
+-------------------------------------------------------------------------------
+Test set: com.pluralsight.blog.Module3_Tests
+-------------------------------------------------------------------------------
+Tests run: 11, Failures: 2, Errors: 3, Skipped: 0, Time elapsed: 7.112 s <<< FAILURE! - in com.pluralsight.blog.Module3_Tests
+task_10(com.pluralsight.blog.Module3_Tests)  Time elapsed: 3.092 s  <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class org.springframework.ui.ModelMap.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 11
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 11.0.7+8-LTS
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 11.0.7+8-LTS
+JVM info           : mixed mode
+OS name            : Windows 10
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [class java.lang.Object, class org.springframework.ui.ModelMap, interface java.io.Serializable, class java.util.LinkedHashMap, class java.util.AbstractMap, interface java.util.Map, interface java.lang.Cloneable, class java.util.HashMap]
+	at com.pluralsight.blog.Module3_Tests.task_10(Module3_Tests.java:419)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [class java.lang.Object, class org.springframework.ui.ModelMap, interface java.io.Serializable, class java.util.LinkedHashMap, class java.util.AbstractMap, interface java.util.Map, interface java.lang.Cloneable, class java.util.HashMap]
+	at com.pluralsight.blog.Module3_Tests.task_10(Module3_Tests.java:419)
+Caused by: java.lang.IllegalStateException: 
+
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at com.pluralsight.blog.Module3_Tests.task_10(Module3_Tests.java:419)
+Caused by: java.lang.UnsupportedOperationException: This feature requires ASM7
+	at com.pluralsight.blog.Module3_Tests.task_10(Module3_Tests.java:419)
+
+task_11(com.pluralsight.blog.Module3_Tests)  Time elapsed: 0.495 s  <<< FAILURE!
+java.lang.AssertionError: Task 11: The template has errors - Request processing failed; nested exception is org.thymeleaf.exceptions.TemplateInputException: Error resolving template [category], template might not exist or might not be accessible by any of the configured Template Resolvers.
+	at com.pluralsight.blog.Module3_Tests.task_11(Module3_Tests.java:471)
+
+task_2(com.pluralsight.blog.Module3_Tests)  Time elapsed: 0.884 s  <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class org.springframework.ui.ModelMap.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 11
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 11.0.7+8-LTS
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 11.0.7+8-LTS
+JVM info           : mixed mode
+OS name            : Windows 10
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [class java.lang.Object, class org.springframework.ui.ModelMap, interface java.io.Serializable, class java.util.LinkedHashMap, class java.util.AbstractMap, interface java.util.Map, interface java.lang.Cloneable, class java.util.HashMap]
+	at com.pluralsight.blog.Module3_Tests.task_2(Module3_Tests.java:138)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [class java.lang.Object, class org.springframework.ui.ModelMap, interface java.io.Serializable, class java.util.LinkedHashMap, class java.util.AbstractMap, interface java.util.Map, interface java.lang.Cloneable, class java.util.HashMap]
+	at com.pluralsight.blog.Module3_Tests.task_2(Module3_Tests.java:138)
+Caused by: java.lang.IllegalStateException: 
+
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at com.pluralsight.blog.Module3_Tests.task_2(Module3_Tests.java:138)
+Caused by: java.lang.UnsupportedOperationException: This feature requires ASM7
+	at com.pluralsight.blog.Module3_Tests.task_2(Module3_Tests.java:138)
+
+task_8(com.pluralsight.blog.Module3_Tests)  Time elapsed: 0.992 s  <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class org.springframework.ui.ModelMap.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 11
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 11.0.7+8-LTS
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 11.0.7+8-LTS
+JVM info           : mixed mode
+OS name            : Windows 10
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [class java.lang.Object, class org.springframework.ui.ModelMap, interface java.io.Serializable, class java.util.LinkedHashMap, class java.util.AbstractMap, interface java.util.Map, interface java.lang.Cloneable, class java.util.HashMap]
+	at com.pluralsight.blog.Module3_Tests.task_8(Module3_Tests.java:338)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [class java.lang.Object, class org.springframework.ui.ModelMap, interface java.io.Serializable, class java.util.LinkedHashMap, class java.util.AbstractMap, interface java.util.Map, interface java.lang.Cloneable, class java.util.HashMap]
+	at com.pluralsight.blog.Module3_Tests.task_8(Module3_Tests.java:338)
+Caused by: java.lang.IllegalStateException: 
+
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at com.pluralsight.blog.Module3_Tests.task_8(Module3_Tests.java:338)
+Caused by: java.lang.UnsupportedOperationException: This feature requires ASM7
+	at com.pluralsight.blog.Module3_Tests.task_8(Module3_Tests.java:338)
+
+task_9(com.pluralsight.blog.Module3_Tests)  Time elapsed: 0.431 s  <<< FAILURE!
+java.lang.AssertionError: Task 9: The template has errors - Request processing failed; nested exception is org.thymeleaf.exceptions.TemplateInputException: Error resolving template [category], template might not exist or might not be accessible by any of the configured Template Resolvers.
+	at com.pluralsight.blog.Module3_Tests.task_9(Module3_Tests.java:389)
+
